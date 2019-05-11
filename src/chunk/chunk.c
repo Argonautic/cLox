@@ -12,6 +12,11 @@ void initChunk(Chunk* chunk) {
     chunk->code = NULL;
 }
 
+void freeChunk(Chunk* chunk) {
+    FREE_ARRAY(uint*_t, chunk->code chunk->capacity);
+    initChunk(chunk);
+}
+
 /*
     Add a new byte of instruction to the chunk
  */
