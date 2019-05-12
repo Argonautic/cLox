@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 #include "chunk.h"
-#include "memory.h"
+#include "../memory/memory.h"
 
 /*
     Initialize the values of a chunk. No array allocated yet
@@ -13,7 +13,7 @@ void initChunk(Chunk* chunk) {
 }
 
 void freeChunk(Chunk* chunk) {
-    FREE_ARRAY(uint*_t, chunk->code chunk->capacity);
+    FREE_ARRAY(uint8_t, chunk->code, chunk->capacity);
     initChunk(chunk);
 }
 
