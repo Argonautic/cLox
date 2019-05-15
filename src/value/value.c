@@ -3,12 +3,6 @@
 #include "../memory/memory.h"
 #include "value.h"
 
-struct valueArray {
-    int capacity;
-    int count;
-    Value* values;
-}
-
 void initValueArray(ValueArray* array) {
     array->values = NULL;
     array->capacity = 0;
@@ -17,7 +11,7 @@ void initValueArray(ValueArray* array) {
 
 void writeValueArray(ValueArray* array, Value value) {
     if (array->capacity < array->count + 1) {
-        int oldCapacity(array->capacity);
+        int oldCapacity = array->capacity;
         array->capacity = GROW_CAPACITY(oldCapacity);
         array->values = GROW_ARRAY(array->values, Value, oldCapacity, array->capacity);
     }

@@ -3,6 +3,7 @@
 #include "debug.h"
 #include "../value/value.h"
 
+static int constantInstruction(const char* name, Chunk* chunk, int offset);
 static int simpleInstruction(const char* name, int offset);
 
 /*
@@ -36,7 +37,7 @@ int disassembleInstruction(Chunk* chunk, int offset) {
 static int constantInstruction(const char* name, Chunk* chunk, int offset) {
     uint8_t constIndex = chunk->code[offset + 1];  // refers to index of where constant is stored in ValueArray
     printf("%-16s %4d '", name, constIndex);
-    printValue(chunk->constants.value[constIndex]);
+    printValue(chunk->constants.values[constIndex]);
     printf("'\n");
     return offset + 2;
 }
