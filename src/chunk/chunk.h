@@ -1,4 +1,6 @@
-/* Module to define code representation - chunk refers to a blob of bytecode */
+/*
+    Module to define code representation - chunk refers to a blob of bytecode
+*/
 
 #ifndef clox_chunk_h
 #define clox_chunk_h
@@ -6,9 +8,15 @@
 #include "../common.h"
 #include "../value/value.h"
 
+/*
+    The next byte after an OP_CONSTANT OpCode is an int that refers to where the
+    constant is stored in the ValueArray
+ */
+
 // OpCode refers to OperationCode, the type of an instruction being run
 typedef enum {
-    OP_RETURN,
+    OP_CONSTANT,
+    OP_RETURN
 } OpCode;
 
 
