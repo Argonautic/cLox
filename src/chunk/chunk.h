@@ -26,12 +26,13 @@ typedef struct {
     int count;  // Count and capacity for dynamic array purposes
     int capacity;
     uint8_t* code;  // Using uint8_t to represent bytes
+    int* lines;  // Array of code line location for each byte - index of a line corresponds to the index of a byte in *code*
     ValueArray constants;
 } Chunk;
 
 void initChunk(Chunk* chunk);
 void freeChunk(Chunk* chunk);
-void writeChunk(Chunk* chunk, uint8_t byte);
+void writeChunk(Chunk* chunk, uint8_t byte, int line);
 int addConstant(Chunk* chunk, Value value);
 
 #endif
