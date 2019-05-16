@@ -7,7 +7,15 @@ static int constantInstruction(const char* name, Chunk* chunk, int offset);
 static int simpleInstruction(const char* name, int offset);
 
 /*
-    Disassemble each instruction in a chunk
+    Disassemble each instruction in a chunk and print debug info. Print info will be in the format:
+
+    == test chunk ==
+    0000  123 OP_CONSTANT         0 '1.2'
+    0002    | OP_RETURN
+
+    Which corresponds to a 3 byte chunk. First byte is the instructions to create a constant, second byte
+    is the index of that constant in the chunk's constant array, and third byte is the instruction for a
+    return. All bytes correspond to code from line 123
  */
 void disassembleChunk(Chunk* chunk, const char* name) {
     printf("== %s ==\n", name);
@@ -19,8 +27,16 @@ void disassembleChunk(Chunk* chunk, const char* name) {
     }
 }
 
+/*
+    Disassemble one instruction
+ */
 int disassembleInstruction(Chunk* chunk, int offset) {
     printf("%04d ", offset);
+    if (offset > 0 && chunk->lines[offset] == chunk->lines[offset - 1]) {  // Same line as previous byte
+        printf("   | ");
+    } else {
+        printf("%4d ", chunk->lines[offset]);
+    }
 
     uint8_t instruction = chunk->code[offset];
     switch (instruction) {
