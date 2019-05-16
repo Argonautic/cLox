@@ -5,7 +5,7 @@
 #include "../value/value.h"
 
 /*
-    Initialize the values of a chunk. No array allocated yet
+    Initialize the values of a chunk. Array allocated on first writeChunk
  */
 void initChunk(Chunk* chunk) {
     chunk->count = 0;
@@ -15,6 +15,9 @@ void initChunk(Chunk* chunk) {
     initValueArray(&(chunk->constants));
 }
 
+/*
+    Deallocate a chunk
+ */
 void freeChunk(Chunk* chunk) {
     FREE_ARRAY(uint8_t, chunk->code, chunk->capacity);
     FREE_ARRAY(int, chunk->lines, chunk->capacity);
@@ -31,7 +34,7 @@ void writeChunk(Chunk* chunk, uint8_t byte, int line) {
         int oldCapacity = chunk->capacity;
         chunk->capacity = GROW_CAPACITY(oldCapacity);
         chunk->code = GROW_ARRAY(chunk->code, uint8_t, oldCapacity, chunk->capacity);
-        chunk->line = GROW_ARRAY(chunk->line, int, oldCapacity, chunk->capacity);
+        chunk->lines = GROW_ARRAY(chunk->lines, int, oldCapacity, chunk->capacity);
     }
 
     chunk->code[chunk->count] = byte;
@@ -39,6 +42,9 @@ void writeChunk(Chunk* chunk, uint8_t byte, int line) {
     chunk->count++;
 }
 
+/*
+    Add a constant to the constants array and return the index it was added into
+ */
 int addConstant(Chunk* chunk, Value value) {
     writeValueArray(&(chunk->constants), value);
     return chunk->constants.count - 1;
