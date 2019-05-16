@@ -5,16 +5,20 @@
  */
 
 #ifndef clox_value_h
-#define clox_Value_h
+#define clox_value_h
 
 #include "../common.h"
 
 typedef double Value;  // begin by supporting double precision floats until we add support for other values
 
-typedef struct valueArray ValueArray;  // This is the constant pool
+typedef struct {
+    int capacity;
+    int count;
+    Value* values;
+} ValueArray;  // This is the constant pool
 
 void initValueArray(ValueArray* array);
-void writeValueArray(ValueArray* array);
+void writeValueArray(ValueArray* array, Value value);
 void freeValueArray(ValueArray* array);
 void printValue(Value value);
 
