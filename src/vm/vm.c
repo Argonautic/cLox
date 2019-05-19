@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "../common.h"
+#include "../debug/debug.h"
 #include "vm.h"
 
 static InterpretResult run();
@@ -30,15 +31,19 @@ InterpretResult interpret(Chunk* chunk) {
     Run a program. ~90% of clox's time will be spent inside this function
  */
 static InterpretResult run() {
-#define READ_BYTE() (*vm.ip++)  // I'm guessing these are defined as macros for call efficiency
-#define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
+    #define READ_BYTE() (*vm.ip++)  // I'm guessing these are defined as macros for call efficiency
+    #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
 
     for (;;) {
+        #ifdef DEBUG_TRACE_EXECUTION
+            disassembleInstruction(vm.chunk, (int)(vm.ip - vm.chunk->code));  // Get address OFFSET between start of code chunk and current instruction
+        #endif
+
         uint8_t instruction;
         switch (instruction = READ_BYTE()) {
             case OP_CONSTANT: {
                 Value constant = READ_CONSTANT();
-                printValue(constant);
+                printValue(constant);  // TODO: Replace with logical operations instead of just printing value
                 printf("\n");
                 break;
             }
@@ -48,6 +53,6 @@ static InterpretResult run() {
         }
     }
 
-#undef READ_BYTE
-#undef READ_CONSTANT
+    #undef READ_BYTE
+    #undef READ_CONSTANT
 }

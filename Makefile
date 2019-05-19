@@ -17,5 +17,5 @@ value.o: src/value/value.c src/value/value.h src/memory/memory.h src/common.h
 debug.o: src/debug/debug.c src/debug/debug.h src/chunk/chunk.h src/value/value.h
 	clang -c src/debug/debug.c
 
-vm.o: src/vm/vm.c src/vm/vm.h src/chunk/chunk.h src/common.h
+vm.o: src/vm/vm.c src/vm/vm.h src/chunk/chunk.h src/common.h src/debug/debug.h
 	clang -c vm/vm.c
