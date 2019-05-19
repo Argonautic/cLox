@@ -13,7 +13,7 @@
     constant is stored in the ValueArray
  */
 
-// OpCode refers to OperationCode, the type of an instruction being run
+// OpCode refers to OperationCode, the type of an instruction being run. First byte of any instruction is always an opcode
 typedef enum {
     OP_CONSTANT,
     OP_RETURN
