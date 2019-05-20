@@ -3,9 +3,6 @@
 #include "debug.h"
 #include "../value/value.h"
 
-static int constantInstruction(const char* name, Chunk* chunk, int offset);
-static int simpleInstruction(const char* name, int offset);
-
 /*
     Disassemble each instruction in a chunk and print debug info. Print info will be in the format:
 
@@ -25,6 +22,19 @@ void disassembleChunk(Chunk* chunk, const char* name) {
         // sizes, and we always want to go to the location of the next instruction
         offset = disassembleInstruction(chunk, offset);
     }
+}
+
+static int constantInstruction(const char* name, Chunk* chunk, int offset) {
+    uint8_t constIndex = chunk->code[offset + 1];  // refers to index of where constant is stored in ValueArray
+    printf("%-16s %4d '", name, constIndex);
+    printValue(chunk->constants.values[constIndex]);
+    printf("'\n");
+    return offset + 2;
+}
+
+static int simpleInstruction(const char* name, int offset) {
+    printf("%s\n", name);
+    return offset + 1;
 }
 
 /*
@@ -48,17 +58,4 @@ int disassembleInstruction(Chunk* chunk, int offset) {
             printf("Unknown opcode %d\n", instruction);
             return offset + 1;
     }
-}
-
-static int constantInstruction(const char* name, Chunk* chunk, int offset) {
-    uint8_t constIndex = chunk->code[offset + 1];  // refers to index of where constant is stored in ValueArray
-    printf("%-16s %4d '", name, constIndex);
-    printValue(chunk->constants.values[constIndex]);
-    printf("'\n");
-    return offset + 2;
-}
-
-static int simpleInstruction(const char* name, int offset) {
-    printf("%s\n", name);
-    return offset + 1;
 }

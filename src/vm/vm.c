@@ -4,8 +4,6 @@
 #include "../debug/debug.h"
 #include "vm.h"
 
-static InterpretResult run();
-
 // Using a single global VM object for now. If we ever used clox as a production compiler,
 // instead pass a pointer to a VM to every function
 VM vm;
@@ -33,15 +31,6 @@ Value pop() {
 }
 
 /*
-    Interpret a single chunk in the vm
- */
-InterpretResult interpret(Chunk* chunk) {
-    vm.chunk = chunk;
-    vm.ip = vm.chunk->code;
-    return run();
-}
-
-/*
     Run a program. ~90% of clox's time will be spent inside this function
  */
 static InterpretResult run() {
@@ -49,7 +38,7 @@ static InterpretResult run() {
     #define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
 
     for (;;) {
-        #ifdef DEBUG_TRACE_EXECUTION
+        #ifdef  DEBUG_TRACE_EXECUTION
             printf("          ");
             for (Value* slot = vm.stack; slot < vm.stackTop; slot++) {
                 printf("[ ");
@@ -77,4 +66,13 @@ static InterpretResult run() {
 
     #undef READ_BYTE
     #undef READ_CONSTANT
+}
+
+/*
+    Interpret a single chunk in the vm
+ */
+InterpretResult interpret(Chunk* chunk) {
+    vm.chunk = chunk;
+    vm.ip = vm.chunk->code;
+    return run();
 }
