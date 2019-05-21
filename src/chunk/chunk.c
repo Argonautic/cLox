@@ -44,6 +44,9 @@ void writeChunk(Chunk* chunk, uint8_t byte, int line) {
 
 /*
     Add a constant to the constants array and return the index it was added into
+
+    TODO: implement OP_CONSTANT_LONG to store constants with indices greater than 255
+          (maybe store three bytes sequentially in *code* with values between 0 and 255)
  */
 int addConstant(Chunk* chunk, Value value) {
     writeValueArray(&(chunk->constants), value);
