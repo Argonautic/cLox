@@ -24,6 +24,43 @@ void initScanner(const char* source) {
     scanner.line = 1;
 }
 
-Token scanToken() {
+static bool isAtEnd() {
+    return *scanner.current == '\0';
+}
 
+static Token makeToken(TokenType type) {
+    Token token;
+    token.type = type;
+    token.start = scanner.start;
+    token.length = scanner.current - scanner.start;  // The book casts this value as an int but I can't tell why that's necessary
+    token.line = scanner.line;
+
+    return token;
+}
+
+/**
+    Create an error token. Points to a message instead of a place in the source code, but the message will
+    always be a string literal that has static storage duration so we don't need to manually free it
+ */
+static Token errorToken(const char *message) {
+    Token token;
+    token.type = TOKEN_ERROR;
+    token.start = message;
+    token.length = (int)strlen(message);  // This makes sense to cast because strlen returns a size_t
+    token.line = scanner.line;
+
+    return token;
+}
+
+/**
+    Scan one new token
+ */
+Token scanToken() {
+    scanner.start = scanner.current;
+
+    if (isAtEnd()) return makeToken(TOKEN_EOF);
+
+    // TODO: Make clox process valid characters. Right now REPL triggers an infinite loop of "Unexpected character."
+
+    return errorToken("Unexpected character.");
 }
