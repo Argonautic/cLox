@@ -28,6 +28,31 @@ static bool isAtEnd() {
     return *scanner.current == '\0';
 }
 
+static char advance() {
+    scanner.current++;
+    return scanner.current[-1];
+}
+
+static char peek() {
+    return *scanner.current;
+}
+
+/**
+    Peek one character ahead of current (two total characters from last scanned character)
+ */
+static char peekNext() {
+    if (isAtEnd()) return '\0';
+    return scanner.current[1];
+}
+
+static bool match(char expected) {
+    if (isAtEnd()) return false;
+    if (*scanner.current != expected) return false;
+
+    scanner.current++;
+    return true;
+}
+
 static Token makeToken(TokenType type) {
     Token token;
     token.type = type;
@@ -52,15 +77,68 @@ static Token errorToken(const char *message) {
     return token;
 }
 
+static void skipWhiteSpace() {
+    for (;;) {
+        char c = peek();
+        switch(c) {
+            case ' ':
+            case '\r':
+            case '\t':
+                advance();
+                break;
+
+            case '\n':
+                scanner.line++;
+                advance();
+                break;
+
+            case '/':
+                if (peekNext() == '/') {
+                    while (peek() != '\n' && !isAtEnd()) advance();
+                } else {
+                    return;
+                }
+                break;
+
+            default:
+                return;
+        }
+    }
+}
+
 /**
     Scan one new token
  */
 Token scanToken() {
+    skipWhiteSpace();
+
     scanner.start = scanner.current;
 
     if (isAtEnd()) return makeToken(TOKEN_EOF);
 
-    // TODO: Make clox process valid characters. Right now REPL triggers an infinite loop of "Unexpected character."
+    char c = advance();
+
+    switch (c) {
+        case '(': return makeToken(TOKEN_LEFT_PAREN);
+        case ')': return makeToken(TOKEN_RIGHT_PAREN);
+        case '{': return makeToken(TOKEN_LEFT_BRACE);
+        case '}': return makeToken(TOKEN_RiGHT_BRACE);
+        case ';': return makeToken(TOKEN_SEMICOLON);
+        case ',': return makeToken(TOKEN_COMMA);
+        case '.': return makeToken(TOKEN_DOT);
+        case '-': return makeToken(TOKEN_MINUS);
+        case '+': return makeToken(TOKEN_PLUS);
+        case '/': return makeToken(TOKEN_SLASH);
+        case '*': return makeToken(TOKEN_STAR);
+        case '!':
+            return makeToken(match('=') ? TOKEN_BANG_EQUAL : TOKEN_BANG);
+        case '=':
+            return makeToken(match('=') ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL);
+        case '<':
+            return makeToken(match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
+        case '>':
+            return makeToken(match('=') ? TOKEN_GREATER_EQUAL : TOKEN_EQUAL);
+    }
 
     return errorToken("Unexpected character.");
 }
