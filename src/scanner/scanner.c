@@ -24,6 +24,10 @@ void initScanner(const char* source) {
     scanner.line = 1;
 }
 
+static bool isDigit(char c) {
+    return c >= '0' && c <= '9';
+}
+
 static bool isAtEnd() {
     return *scanner.current == '\0';
 }
@@ -53,6 +57,10 @@ static bool match(char expected) {
     return true;
 }
 
+/**
+    Return a new token. Token is represented by type, start index in source string, length in source string,
+    and line # in source code. Each makeToken() call resets where the "current" char pointer points to
+ */
 static Token makeToken(TokenType type) {
     Token token;
     token.type = type;
@@ -107,6 +115,39 @@ static void skipWhiteSpace() {
 }
 
 /**
+    Process a number literal. Conversion from token lexeme to runtime number value happens in compilation
+ */
+static Token number() {
+    while (isDigit(peek())) advance();
+
+    // Look for a fractional part
+    if (peek() == '.' && isDigit(peekNext())) {
+        // Consume the "."
+        advance();
+
+        while (isDigit(peek())) advance();
+    }
+
+    return makeToken(TOKEN_NUMBER);
+}
+
+/**
+    Process a string literal. Conversion from token lexeme to runtime string value happens in compilation
+ */
+static Token string() {
+    while (peek() != '"' && !isAtEnd()) {
+        if (peek() == '\n') scanner.line++;
+        advance();
+    }
+
+    if (isAtEnd()) return errorToken("Unterminated string.");
+
+    // The closing "
+    advance();
+    return makeToken(TOKEN_STRING);
+}
+
+/**
     Scan one new token
  */
 Token scanToken() {
@@ -117,6 +158,8 @@ Token scanToken() {
     if (isAtEnd()) return makeToken(TOKEN_EOF);
 
     char c = advance();
+
+    if (isDigit(c)) return number();
 
     switch (c) {
         case '(': return makeToken(TOKEN_LEFT_PAREN);
@@ -138,6 +181,8 @@ Token scanToken() {
             return makeToken(match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
         case '>':
             return makeToken(match('=') ? TOKEN_GREATER_EQUAL : TOKEN_EQUAL);
+
+        case '"': return string();
     }
 
     return errorToken("Unexpected character.");
