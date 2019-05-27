@@ -1,21 +1,16 @@
-# Dependency files (e.g. main.o, chunk.o) will be created at the path specified in rule dependency (why?)
-clox: src/main.o src/chunk/chunk.o src/memory/memory.o src/value/value.o src/debug/debug.o src/vm/vm.o
-	clang -o clox src/main.o src/chunk/chunk.o src/memory/memory.o src/value/value.o src/debug/debug.o src/vm/vm.o
+CC ?= clang
 
-main.o: src/main.c src/chunk/chunk.h src/memory/memory.h src/common.h
-	clang -c src/main.c
+objects = src/main.o src/chunk/chunk.o src/memory/memory.o src/value/value.o src/debug/debug.o \
+          src/vm/vm.o src/compiler/compiler.o src/scanner/scanner.o
 
-chunk.o: src/chunk/chunk.c src/chunk/chunk.h src/memory/memory.h src/common.h
-	clang -c src/chunk/chunk.c
+clox: $(objects)
+	cc -o clox $(objects)
 
-memory.o: src/memory/memory.c src/memory/memory.h src/common.h
-	clang -c src/memory/memory.c
-
-value.o: src/value/value.c src/value/value.h src/memory/memory.h src/common.h
-	clang -c src/value/value.c
-
-debug.o: src/debug/debug.c src/debug/debug.h src/chunk/chunk.h src/value/value.h
-	clang -c src/debug/debug.c
-
-vm.o: src/vm/vm.c src/vm/vm.h src/chunk/chunk.h src/common.h src/value/value.h src/debug/debug.h
-	clang -c vm/vm.c
+src/main.o: src/chunk/chunk.h src/memory/memory.h src/debug/debug.h src/common.h
+src/chunk/chunk.o: src/memory/memory.h src/common.h
+src/memory/memory.o: src/common.h
+src/value/value.o: src/memory/memory.h src/common.h
+src/debug/debug.o: src/chunk/chunk.h src/value/value.h
+src/vm/vm.o: src/chunk/chunk.h src/common.h src/value/value.h src/debug/debug.h src/compiler/compiler.h
+src/compiler/compiler.o: src/scanner/scanner.h
+src/scanner/scanner.o:
