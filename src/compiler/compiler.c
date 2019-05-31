@@ -14,6 +14,12 @@ typedef struct {
 
 Parser parser;  // Single global variable like vm and scanner. Make factory if using for prod
 
+Chunk* compilingChunk;
+
+static Chunk* currentChunk() {
+    return compilingChunk;
+}
+
 static void errorAt(Token* token, const char* message) {
     if (parser.panicMode) return;  // Stop reporting errors until we reach synchronization point (statement boundary)
     parser.panicMode = true;
@@ -64,6 +70,61 @@ static void consume(TokenType type, const char* message) {
     errorAtCurrent(message);
 }
 
+/**
+    Write one byte to the chunk
+ */
+static void emitByte(uint8_t byte) {
+    writeChunk(currentChunk(), byte, parser.previous.line);  // previous line used for error reporting
+}
+
+/**
+    Emit two bytes consecutively. Convenience function for emitting opcode byte + operand byte
+ */
+static void emitBytes(uint8_t byte1, uint8_t byte2) {
+    emitByte(1);
+    emitByte(2);
+}
+
+/**
+    Emit function return
+ */
+static void emitReturn() {
+    emitByte(OP_RETURN);
+}
+
+/**
+    Add a constant to the chunk constant array and check if too many constants
+ */
+static uint8_t makeConstant(Value value) {
+    int constant = addConstant(currentChunk(), value);
+    if (constant > UINT8_MAX) {
+        error("Too many constants in one chunk.");
+        return 0;
+    }
+
+    return (uint8_t)constant;
+}
+
+static void emitConstant(Value value) {
+    emitBytes(OP_CONSTANT, makeConstant(value));
+}
+
+static void endCompiler() {
+    emitReturn();
+}
+
+/**
+    Emit one number constant
+ */
+static void number() {
+    double value = strtod(parser.previous.start, NULL);  // Convert previously consumed number token into a double
+    emitConstant(value);
+}
+
+void expression() {
+
+}
+
 bool compile(const char* source, Chunk* chunk) {
     initScanner(source);
 
@@ -71,7 +132,8 @@ bool compile(const char* source, Chunk* chunk) {
     parser.panicMode = false;
 
     advance();
-    // expression();
+    expression();
     consume(TOKEN_EOF, "Expect end of expression.");
+    endCompiler();
     return !parser.hadError;
 }
