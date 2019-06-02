@@ -31,7 +31,7 @@ Value pop() {
     return *vm.stackTop;
 }
 
-/*
+/**
     Run a program. ~90% of clox's time will be spent inside this function
  */
 static InterpretResult run() {
@@ -83,10 +83,23 @@ static InterpretResult run() {
     #undef BINARY_OP
 }
 
-/*
+/**
     Interpret a single chunk in the vm
  */
 InterpretResult interpret(const char* source) {
-    compile(source);
-    return INTERPRET_OK;
+    Chunk chunk;
+    initChunk(&chunk);
+
+    if (!compile(source, &chunk)) {
+        freeChunk(&chunk);
+        return INTERPRET_COMPILE_ERROR;
+    }
+
+    vm.chunk = &chunk;
+    vm.ip = vm.chunk->code;
+
+    InterpretResult result = run();
+
+    freeChunk(&chunk);
+    return result;
 }
