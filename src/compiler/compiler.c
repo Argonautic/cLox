@@ -43,6 +43,13 @@ static Chunk* currentChunk() {
     return compilingChunk;
 }
 
+/**
+    Report an error at a particular token. If panic mode activated, do nothing. If panic mode not activated, activate
+    panic mode, print an error message, tell parser that the compiler had an error, and skip all errors until we find
+    a statement boundary to turn off panic mode
+
+    TODO: Add ability to turn panic mode off once statements are added to cLox
+ */
 static void errorAt(Token* token, const char* message) {
     if (parser.panicMode) return;  // Stop reporting errors until we reach synchronization point (statement boundary)
     parser.panicMode = true;
@@ -52,7 +59,7 @@ static void errorAt(Token* token, const char* message) {
     if (token->type == TOKEN_EOF) {
         fprintf(stderr, " at end");
     } else if (token->type == TOKEN_ERROR) {
-
+        // Don't report anything because we're in panic mode
     } else {
         fprintf(stderr, " at '%.*s'", token->length, token->start);  // print token itself
     }
@@ -69,6 +76,10 @@ static void errorAtCurrent(const char* message) {
     errorAt(&parser.current, message);
 }
 
+/**
+    Save current token as previous token, get next token, and save as current token. If the next token is an
+    ERROR_TOKEN (represents lexical errors in scanning), report it
+ */
 static void advance() {
     parser.previous = parser.current;
 
@@ -82,7 +93,7 @@ static void advance() {
 }
 
 /**
-    Consume a particular TokenType or report error if type isn't next to be consumed
+    Consume a particular TokenType token or report an error if type isn't next to be consumed
  */
 static void consume(TokenType type, const char* message) {
     if (parser.current.type == type) {
@@ -140,6 +151,10 @@ static void expression();
 static ParseRule* getRule(TokenType type);
 static void parsePrecedence(Precedence precedence);
 
+/**
+    Parse a new binary expression. Important to remember that chained binary expressions should be broken down into
+    atomic binary expressions. For example, 5 + 5 + 5 + 5 is three separate binary expressions ((5 + 5) + 5) + 5
+ */
 static void binary() {
     // Remember the operator.
     TokenType operatorType = parser.previous.type;
@@ -191,6 +206,9 @@ static void unary() {
     token, infix prop handles which tokens indiciate an expression using previous and succeeding tokens, and precedence
     prop indicates precedence
 
+    rules indices correspond to the enum values of TokenType, which allows us to get a particular token's ParseRule
+    using that token's TokenType enum value
+
     TODO: Not all rules are filled in yet. Until they are, placeholder is { NULL, NULL, PREC_NONE }
  */
 ParseRule rules[] = {
@@ -237,8 +255,8 @@ ParseRule rules[] = {
 };
 
 /**
-    Get an expression based on precedence, with *precendence* being the max precedence the expression may have (higher
-    precedence means LOWER enum value in the Precedence struct)
+    Parse an expression based on precedence, with *precendence* being the lowest precedence the expression may have
+    (higher precedence means higher enum value in the Precedence struct)
  */
 static void parsePrecedence(Precedence precedence) {
     advance();
@@ -251,8 +269,9 @@ static void parsePrecedence(Precedence precedence) {
     }
     prefixRule();
 
-    // Only continue parsing for infix expressions if the infix expression has lower precedence than *precedence*. If
-    // next token has too high precedence, or isn't an infix operator, expression is done
+    // Only continue parsing for infix expressions if the infix expression has greater or equal precedence than
+    // *precedence*. If next token has too low precedence, or isn't an infix operator, expression is done and stop
+    // advancing
     while (precedence <= getRule(parser.current.type)->precedence) {
         advance();
         ParseFn infixRule = getRule(parser.previous.type)->infix;
