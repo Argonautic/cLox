@@ -170,7 +170,7 @@ static void binary() {
 
     // Compile the right operand
     ParseRule* rule = getRule(operatorType);
-    parsePrecedence((Precedence)(rule->precedence + 1));
+    parsePrecedence((Precedence)(rule->precedence + 1));  // parsePrecedence with rule's precedence + 1 because binary expressions are left associative
 
     // Emit the operator instruction.
     switch (operatorType) {
@@ -266,6 +266,18 @@ ParseRule rules[] = {
 /**
     Parse an expression based on precedence, with *precendence* being the lowest precedence the expression may have
     (higher precedence means higher enum value in the Precedence struct)
+
+    5 + 4 * 2 is parsed in this order:
+        - 5 is parsed as a number expression. OP_CONSTANT and index in chunk const array is emitted for const 5
+        - + is parsed as an binary expression, because it has higher precedence than the beginning precedence of assignment
+        - In the process of parsing +, the second operand is parsed
+        - 4 is parsed as a number expression. OP_CONSTANT and index in chunk const array is emitted for const 4
+        - * is parsed as a binary expression, because it has a higher precedence than +
+        - In the process of parsing *, the second operand is parsed
+        - 2 is parsed as a number expression. OP_CONSTANT and index in chunk const array is emitted for const 2
+        - Nothing left in full expression to parse, no more tokens consumed
+        - At the end of parsing *, OP_MULTIPLY is emitted to multiply the previous two constants (4 and 2)
+        - At the end of parsing +, OP_ADD is emitted to add the previous two constants (5 and (4 * 2))
  */
 static void parsePrecedence(Precedence precedence) {
     advance();
