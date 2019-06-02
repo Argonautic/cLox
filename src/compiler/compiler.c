@@ -5,6 +5,10 @@
 #include "compiler.h"
 #include "../scanner/scanner.h"
 
+#ifdef DEBUG_PRINT_CODE
+#include "../debug/debug.h"
+#endif
+
 typedef struct {
     Token current;
     Token previous;
@@ -145,6 +149,11 @@ static void emitConstant(Value value) {
 
 static void endCompiler() {
     emitReturn();
+    #ifdef DEBUG_PRINT_CODE
+        if (!parser.hadError) {
+            disassembleChunk(currentChunk(), "code");
+        }
+    #endif
 }
 
 static void expression();
@@ -293,6 +302,7 @@ void expression() {
 bool compile(const char* source, Chunk* chunk) {
     initScanner(source);
 
+    compilingChunk = chunk;
     parser.hadError = false;
     parser.panicMode = false;
 
