@@ -9,7 +9,24 @@
 
 #include "../common.h"
 
-typedef double Value;  // begin by supporting double precision floats until we add support for other values
+typedef enum {
+    VAL_BOOL,
+    VAL_NIL,
+    VAL_NUMBER
+} ValueType;
+
+/**
+    Struct to represent a Lox value's type. *type* holds the enum value of the type and the union holds the actual value
+
+    TODO: Improve memory efficiency of type tag
+*/
+typedef struct {
+    ValueType type;
+    union {
+        bool boolean;
+        double number;
+    } as;
+} Value;
 
 typedef struct {
     int capacity;
