@@ -193,7 +193,7 @@ static void grouping() {
  */
 static void number() {
     double value = strtod(parser.previous.start, NULL);  // Convert previously consumed number token into a double
-    emitConstant(value);
+    emitConstant(NUMBER_VAL(value));
 }
 
 static void unary() {
