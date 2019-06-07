@@ -20,6 +20,9 @@ typedef enum {
     OP_NIL,
     OP_TRUE,
     OP_FALSE,
+    OP_EQUAL,  // No separate tokens for !=, <=, and >= since those can be represented with compound bytecode instructions (e.g. !(x < y)), but would be good for performance!
+    OP_GREATER,
+    OP_LESS,
     OP_ADD,
     OP_SUBTRACT,
     OP_MULTIPLY,
