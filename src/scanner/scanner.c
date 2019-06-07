@@ -165,7 +165,7 @@ static TokenType identifierType() {
             if (scanner.current - scanner.start > 1) {
                 switch (scanner.start[1]) {
                     case 'h': return checkKeyword(2, 2, "is", TOKEN_THIS);
-                    case 'r': return checkKeyword(2, 2, "rue", TOKEN_TRUE);
+                    case 'r': return checkKeyword(2, 2, "ue", TOKEN_TRUE);
                 }
             }
             break;
@@ -252,7 +252,7 @@ Token scanToken() {
         case '<':
             return makeToken(match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
         case '>':
-            return makeToken(match('=') ? TOKEN_GREATER_EQUAL : TOKEN_EQUAL);
+            return makeToken(match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
 
         case '"': return string();
     }

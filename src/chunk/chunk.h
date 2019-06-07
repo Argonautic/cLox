@@ -1,4 +1,4 @@
-/*
+/**
     Module to define code representation - chunk refers to a blob of bytecode
 */
 
@@ -8,25 +8,32 @@
 #include "../common.h"
 #include "../value/value.h"
 
-/*
-    The next byte after an OP_CONSTANT OpCode is an int that refers to where the
-    constant is stored in the ValueArray
- */
+// Literals whose values can't be enumerated (like strings & numbers) are denoted by OP_CONSTANT codes. The next byte
+// after an OP_CONSTANT OpCode is an int that refers to where the constant is stored in the ValueArray
 
-// OpCode refers to OperationCode, the type of an instruction being run. First byte of any instruction is always an opcode
+/**
+    OpCode refers to OperationCode, the type of an instruction being run. First byte of any instruction is always an
+    opcode
+*/
 typedef enum {
     OP_CONSTANT,
+    OP_NIL,
+    OP_TRUE,
+    OP_FALSE,
+    OP_EQUAL,  // No separate tokens for !=, <=, and >= since those can be represented with compound bytecode instructions (e.g. !(x < y)), but would be good for performance!
+    OP_GREATER,
+    OP_LESS,
     OP_ADD,
     OP_SUBTRACT,
     OP_MULTIPLY,
     OP_DIVIDE,
+    OP_NOT,
     OP_NEGATE,
     OP_RETURN
 } OpCode;
 
 
-// Chunk will hold a series of instructions, along with other related data
-// Stored as dynamic array
+/** Chunk will hold a series of instructions, along with other related data. Stored as dynamic array */
 typedef struct {
     int count;  // Count and capacity for dynamic array purposes
     int capacity;
