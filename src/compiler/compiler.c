@@ -289,7 +289,7 @@ ParseRule rules[] = {
 
     5 + 4 * 2 is parsed in this order:
         - 5 is parsed as a number expression. OP_CONSTANT and index in chunk const array is emitted for const 5
-        - + is parsed as an binary expression, because it has higher precedence than the beginning precedence of assignment
+        - + is parsed as an binary expression, because it has higher precedence than the default precedence of "assignment"
         - In the process of parsing +, the second operand is parsed
         - 4 is parsed as a number expression. OP_CONSTANT and index in chunk const array is emitted for const 4
         - * is parsed as a binary expression, because it has a higher precedence than +
@@ -298,6 +298,26 @@ ParseRule rules[] = {
         - Nothing left in full expression to parse, no more tokens consumed
         - At the end of parsing *, OP_MULTIPLY is emitted to multiply the previous two constants (4 and 2)
         - At the end of parsing +, OP_ADD is emitted to add the previous two constants (5 and (4 * 2))
+
+    5 * 4 + 2 + 3 is parsed in this order:
+        - 5 is parsed as a number expression. OP_CONSTANT and index in chunk const array is emitted for const 5
+        - * is parsed as an binary expression, because it has higher precedence than the default precedence of "assignment"
+        - In the process of parsing *, the second operand is parsed
+        - 4 is parsed as a number expression. OP_CONSTANT and index in chunk const array is emitted for const 4
+        - + is not parsed, because it has less precedence than (one precedence higher than) *
+        - At the end of parsing *, OP_MULTIPLY is emitted to multiply the previous two constants (5 and 4)
+        - Initial parsePrecedence while loop advances
+        - + is parsed as a binary expression, because it has higher precendence than the default precedence of "assignment"
+        - In the process of parsing +, the second operand is parsed
+        - 2 is parsed as a number expression. OP_CONSTANT and index in chunk const array is emitted for const 2
+        - + is not parsed, because it has less precedence than (one precedence higher than +
+        - At the end of parsing +, OP_ADD is emitted to add the previous two constants ((5 * 4) and 2)
+        - Initial parsePrecedence while loop advances
+        - + is parsed as a binary expression, because it has higher precendence than the default precedence of "assignment"
+        - In the process of parsing +, the second operand is parsed
+        - 3 is parsed as a number expression. OP_CONSTANT and index in chunk const array is emitted for const 3
+        - Nothing left in full expression to parse, no more tokens consumed
+        - At the end of parsing +, OP_ADD is emitted to add the previous two constants (((5 * 4) + 2) and 3)
  */
 static void parsePrecedence(Precedence precedence) {
     advance();
