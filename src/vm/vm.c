@@ -66,6 +66,29 @@ static bool isFalsey(Value value) {
 
 /**
     Run a program. ~90% of clox's time will be spent inside this function
+
+    The expression 5 * 4 + 2 will be sent to VM as the bytecode instructions:
+
+        OP_CONSTANT (5)
+        index in chunk's const array (0)
+        OP_CONSTANT (4)
+        index in chunk's const array (1)
+        OP_MULTIPLY
+        OP CONSTANT (2)
+        OP_ADD
+        OP_RETURN
+
+    VM will interpret as:
+
+        - Push new value 5 onto the stack ([ 5 ])
+        - Push new value 4 onto the stack ([ 5 ][ 4 ])
+        - Pop the previous two values from the stack ()
+        - Multiply those values and push the result onto the stack ([ 20 ])
+        - Push new value 2 onto the stack ([ 20 ][ 2 ])
+        - Pop the previous two values from the stack ()
+        - Add those values and push the result onto the stack ([ 22 ])
+        - Pop the previous value from th stack ()
+        - Return that value (return 22)
  */
 static InterpretResult run() {
     #define READ_BYTE() (*vm.ip++)
