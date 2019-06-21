@@ -9,7 +9,9 @@
 
 #include "../common.h"
 
-typedef struct sObj Obj;  // Forward declaration of Obj to get around circular dependencies
+// Forward declarations of Obj structs to get around circular dependencies
+typedef struct sObj Obj;
+typedef struct sObjString ObjString;
 
 typedef enum {
     VAL_BOOL,
