@@ -1,6 +1,9 @@
 #ifndef clox_memory_h
 #define clox_memory_h
 
+#define ALLOCATE(type, count) \
+    (type*)reallocate(NULL, 0, sizeof(type) * (count))
+
 // These are macros because they need to support different types and C is butt at that
 // Eventually replace with inline functions, but it might be tough since you can't
 // pass in a type as a variable
@@ -13,6 +16,6 @@
 #define FREE_ARRAY(type, pointer, oldCount) \
     reallocate(pointer, sizeof(type) * (oldCount), 0)
 
-void* reallocate(void* previous, size_t, size_t newSize);
+void* reallocate(void* previous, size_t oldSize, size_t newSize);
 
 #endif

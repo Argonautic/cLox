@@ -12,7 +12,7 @@
 #define AS_CSTRING(value)   (((ObjString*)AS_OBJ(value))->chars)
 
 typedef enum {
-    OBJ_STRING;
+    OBJ_STRING
 } ObjType;
 
 struct sObj {
@@ -26,6 +26,8 @@ struct sObjString {
     int length;
     char* chars;
 };
+
+ObjString* copyString(const char* chars, int length);
 
 /**
     Checks for if a Value represents a certain ObjType. Allows you to safely cast *Obj to *ObjType
