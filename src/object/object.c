@@ -24,6 +24,10 @@ static ObjString* allocateString(char* chars, int length) {
     return string;
 }
 
+ObjString* takeString(char* chars, int length) {
+    return allocateString(chars, length);
+}
+
 /**
     Copy chars from source code string into new null terminated string. We do this because not all strings will be
     expressly written literals in the code (e.g. some may be created by string concatenation), so for every string value
