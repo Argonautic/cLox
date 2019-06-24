@@ -28,6 +28,7 @@ struct sObjString {
 };
 
 ObjString* copyString(const char* chars, int length);
+void printObject(Value value);
 
 /**
     Checks for if a Value represents a certain ObjType. Allows you to safely cast *Obj to *ObjType
