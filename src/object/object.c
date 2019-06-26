@@ -6,16 +6,26 @@
 #include "../value/value.h"
 #include "../vm/vm.h"
 
-// These kinds of macros exist to avoid having to manullaly cast void* into the actual pointer type you want
+/**
+    Shortcut macro to allocate and get a new Object. *type* refers to the type of Object pointer you get back, and
+    objectType refers to the value of the ObjType type field that exists on the base Obj struct. Macro exists to avoid
+    having to manullaly cast void* into desired pointer type every time
+ */
 #define ALLOCATE_OBJ(type, objectType) \
     (type*)allocateObject(sizeof(type), objectType)
 
+/**
+    Allocate space for a new lox Object and set its type equal to *type*
+ */
 static Obj* allocateObject(size_t size, ObjType type) {
     Obj* object = (Obj*)reallocate(NULL, 0, size);
     object->type = type;
     return object;
 }
 
+/**
+    Allocate space for a new lox String Object and set its fields appropriately
+ */
 static ObjString* allocateString(char* chars, int length) {
     ObjString* string = ALLOCATE_OBJ(ObjString, OBJ_STRING);
     string->length = length;

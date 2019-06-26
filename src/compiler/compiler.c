@@ -143,6 +143,11 @@ static uint8_t makeConstant(Value value) {
     return (uint8_t)constant;
 }
 
+
+/**
+    Emit a new constant byte to the bytestream, along with its index in the constant array. Since constants are of type
+    Value, they can represent any lox type (number, string, etc.)
+ */
 static void emitConstant(Value value) {
     emitBytes(OP_CONSTANT, makeConstant(value));
 }
