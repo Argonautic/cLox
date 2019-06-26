@@ -17,6 +17,7 @@ typedef enum {
 
 struct sObj {
     ObjType type;
+    struct sObj* next;  // Pointer to the next object in the heap. Temp fix to keep track of memory before implementing GC
 };
 
 // Important that the Obj is the first field, because C will store obj first in memory, which means you can cast

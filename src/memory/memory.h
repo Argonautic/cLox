@@ -1,8 +1,13 @@
 #ifndef clox_memory_h
 #define clox_memory_h
 
+#include "../object/object.h"
+
 #define ALLOCATE(type, count) \
     (type*)reallocate(NULL, 0, sizeof(type) * (count))
+
+#define FREE(type, pointer) \
+    reallocate(pointer, sizeof(type), 0)
 
 // These are macros because they need to support different types and C is butt at that
 // Eventually replace with inline functions, but it might be tough since you can't
@@ -17,5 +22,6 @@
     reallocate(pointer, sizeof(type) * (oldCount), 0)
 
 void* reallocate(void* previous, size_t oldSize, size_t newSize);
+void freeObjects();
 
 #endif

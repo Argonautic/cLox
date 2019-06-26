@@ -41,12 +41,21 @@ static void runtimeError(const char* format, ...) {
 
 void initVM() {
     resetStack();
+    vm.objects = NULL;
 }
 
 void freeVM() {
-
+    freeObjects();
 }
 
+
+/**
+    Push a new Value onto the value stack.
+
+    When pushing an Object, such as a string (StrObj), we read its Value constant struct from the constant array, which
+    contains a pointer to the Object, which itself contains a pointer to the dynamically allocated value (in this case a
+    string). No
+ */
 void push(Value value) {
     *vm.stackTop = value;
     vm.stackTop++;
