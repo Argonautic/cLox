@@ -29,16 +29,35 @@ static Obj* allocateObject(size_t size, ObjType type) {
 /**
     Allocate space for a new lox String Object and set its fields appropriately
  */
-static ObjString* allocateString(char* chars, int length) {
+static ObjString* allocateString(char* chars, int length, uint32_t hash) {
     ObjString* string = ALLOCATE_OBJ(ObjString, OBJ_STRING);
     string->length = length;
     string->chars = chars;
+    string->hash = hash;
 
     return string;
 }
 
+/**
+    Implementation of an FNV-1a hash on a string
+ */
+static uint32_t hashString(const char* key, int length) {
+    uint32_t hash = 2166136261u;
+
+    for (int i = 0; i < length; i++) {
+        hash ^= key[i];
+        hash *= 16777619;
+    }
+
+    return hash;
+}
+
+/**
+    Create a new object using an existing string in memory. Used to transfer ownership of strings between StrObjs
+ */
 ObjString* takeString(char* chars, int length) {
-    return allocateString(chars, length);
+    uint32_t hash = hashString(chars, length);
+    return allocateString(chars, length, hash);
 }
 
 /**
@@ -47,11 +66,13 @@ ObjString* takeString(char* chars, int length) {
     in lox, we allocate a new array of chars on the lox heap (implemented with the C heap)
  */
 ObjString* copyString(const char* chars, int length) {
+    uint32_t hash = hashString(chars, length);
+
     char* heapChars = ALLOCATE(char, length + 1);
     memcpy(heapChars, chars, length);
     heapChars[length] = '\0';
 
-    return allocateString(heapChars, length);
+    return allocateString(heapChars, length, hash);
 }
 
 void printObject(Value value) {

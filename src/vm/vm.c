@@ -92,7 +92,6 @@ static void concatenate() {
 
     ObjString* result = takeString(chars, length);
     push(OBJ_VAL(result));
-
 }
 
 /**
