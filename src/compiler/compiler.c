@@ -143,6 +143,11 @@ static uint8_t makeConstant(Value value) {
     return (uint8_t)constant;
 }
 
+
+/**
+    Emit a new constant byte to the bytestream, along with its index in the constant array. Since constants are of type
+    Value, they can represent any lox type (number, string, etc.)
+ */
 static void emitConstant(Value value) {
     emitBytes(OP_CONSTANT, makeConstant(value));
 }
@@ -215,6 +220,11 @@ static void number() {
     emitConstant(NUMBER_VAL(value));
 }
 
+static void string() {
+    // + 1 and -2 trim the leading and trailing quotation marks off of the current string lexeme
+    emitConstant(OBJ_VAL(copyString(parser.previous.start + 1, parser.previous.length -2)));
+}
+
 static void unary() {
     TokenType operatorType = parser.previous.type;
 
@@ -261,7 +271,7 @@ ParseRule rules[] = {
     { NULL,     binary,  PREC_COMPARISON }, // TOKEN_LESS
     { NULL,     binary,  PREC_COMPARISON }, // TOKEN_LESS_EQUAL
     { NULL,     NULL,    PREC_NONE },       // TOKEN_IDENTIFIER
-    { NULL,     NULL,    PREC_NONE },       // TOKEN_STRING
+    { string,   NULL,    PREC_NONE },       // TOKEN_STRING
     { number,   NULL,    PREC_NONE },       // TOKEN_NUMBER
     { NULL,     NULL,    PREC_AND },        // TOKEN_AND
     { NULL,     NULL,    PREC_NONE },       // TOKEN_CLASS
