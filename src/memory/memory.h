@@ -18,6 +18,9 @@
 #define GROW_ARRAY(previous, type, oldCount, count) \
     (type*)reallocate(previous, sizeof(type) * (oldCount), sizeof(type) * count)
 
+/**
+    Frees an array with *oldCount* entries of type *type* pointed to by *pointer*
+ */
 #define FREE_ARRAY(type, pointer, oldCount) \
     reallocate(pointer, sizeof(type) * (oldCount), 0)
 
