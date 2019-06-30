@@ -66,6 +66,19 @@ static void adjustCapacity(Table* table, int capacity) {
 }
 
 /**
+    Get an Entry by key, and put its Value into *value*. Returns true if found an entry and false otherwise
+ */
+bool tableGet(Table* table, ObjString* key, Value* value) {
+    if (table->entries == NULL) return false;
+
+    Entry* entry = findEntry(table->entries, table->capacity, key);
+    if (entry->key == NULL) return false;
+
+    *value = entry->value;
+    return true;
+}
+
+/**
     Set an entry in a table
  */
 bool tableSet(Table* table, ObjString* key, Value value) {
