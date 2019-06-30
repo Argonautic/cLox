@@ -26,13 +26,26 @@ void freeTable(Table* table) {
  */
 static Entry* findEntry(Entry* entries, int capacity, ObjString* key) {
     uint32_t index = key->hash % capacity;
+    Entry* tombstone = NULL;
 
-    // Probe until you find the entry or a bucket that can contain the new entry. Guaranteed to find at least one empty
-    // bucket because max load factor is 75%
+    // Probe until you find the entry or a bucket that can contain the new entry. Guaranteed to find entry or an empty
+    // bucket because max load factor is 75%. If you come across a bucket that has a NULL key, check if its a tombstone
+    // by checking its value, and if so, save the tombstone entry. IF you come across a truly empty bucket, return the
+    // tombstone or NULL (we return the tombstone so it can be reused for setting key/values). Tombstones are considered
+    // to be full entries for load factor purposes
     for (;;) {
         Entry* entry = &(entries[index]);
 
-        if (entry->key == key || entry->key == NULL) {
+        if (entry->key == NULL) {
+            if (IS_NIL(entry->value)) {
+                // Empty entry
+                return tombstone != NULL ? tombstone : entry;
+            } else {
+                // We found a tombstone
+                if (tombstone == NULL) tombstone = entry;
+            }
+        } else if (entry->key == key) {
+            // We found the key
             return entry;
         }
 
@@ -50,6 +63,7 @@ static void adjustCapacity(Table* table, int capacity) {
         entries[i].value = NIL_VAL;
     }
 
+    table->count = 0;  // Don't carry over tombstones
     // Copy over any existing entries in old entries array. Remap them to the appropriate bucket in new array
     for (int i = 0; i < table->capacity; i++) {
         Entry* entry = &(table->entries[i]);
@@ -58,6 +72,7 @@ static void adjustCapacity(Table* table, int capacity) {
         Entry* dest = findEntry(entries, capacity, entry->key);
         dest->key = entry->key;
         dest->value = entry->value;
+        table->count++;
     }
 
     FREE_ARRAY(Entry, table->entries, table->capacity);
@@ -90,11 +105,28 @@ bool tableSet(Table* table, ObjString* key, Value value) {
     Entry* entry = findEntry(table->entries, table->capacity, key);
 
     bool isNewKey = entry->key == NULL;
-    if (isNewKey) table->count++;
+    if (isNewKey && IS_NIL(entry->value)) table->count++;  // Increment count if the key is new and not going into a tombstone
 
     entry->key = key;
     entry->value = value;
     return isNewKey;
+}
+
+/**
+    Delete a value by replacing it with a tombstone (empty key, value of true). Tombstones mark a spot in the Table that
+    has no real value, but should not trigger the end of the probe (since we're using open addressing to store values)
+ */
+bool tableDelete(Table* table, ObjString* key) {
+    if (table->count == 0) return false;
+
+    // Find the entry
+    Entry* entry = findEntry(table->entries, table->capacity, key);
+    if (entry->key == NULL) return false;
+
+    entry->key = NULL;
+    entry->value = BOOL_VAL(true);
+
+    return true;
 }
 
 /**
