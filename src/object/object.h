@@ -26,6 +26,7 @@ struct sObjString {
     Obj obj;
     int length;
     char* chars;
+    uint32_t hash;  // The hash code of the string
 };
 
 ObjString* takeString(char* chars, int length);

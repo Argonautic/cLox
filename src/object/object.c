@@ -3,6 +3,7 @@
 
 #include "../memory/memory.h"
 #include "object.h"
+#include "../table/table.h"
 #include "../value/value.h"
 #include "../vm/vm.h"
 
@@ -27,31 +28,64 @@ static Obj* allocateObject(size_t size, ObjType type) {
 }
 
 /**
-    Allocate space for a new lox String Object and set its fields appropriately
+    Allocate space for a new lox String Object and set its fields appropriately. Intern the object's string
  */
-static ObjString* allocateString(char* chars, int length) {
+static ObjString* allocateString(char* chars, int length, uint32_t hash) {
     ObjString* string = ALLOCATE_OBJ(ObjString, OBJ_STRING);
     string->length = length;
     string->chars = chars;
+    string->hash = hash;
+
+    tableSet(&vm.strings, string, NIL_VAL);  // Set the char array in the set of interned strings
 
     return string;
 }
 
-ObjString* takeString(char* chars, int length) {
-    return allocateString(chars, length);
+/**
+    Implementation of an FNV-1a hash on a string
+ */
+static uint32_t hashString(const char* key, int length) {
+    uint32_t hash = 2166136261u;
+
+    for (int i = 0; i < length; i++) {
+        hash ^= key[i];
+        hash *= 16777619;
+    }
+
+    return hash;
 }
 
 /**
-    Copy chars from source code string into new null terminated string. We do this because not all strings will be
-    expressly written literals in the code (e.g. some may be created by string concatenation), so for every string value
-    in lox, we allocate a new array of chars on the lox heap (implemented with the C heap)
+    Create a new object using an existing string in memory. Used to transfer ownership of strings between StrObjs
+ */
+ObjString* takeString(char* chars, int length) {
+    uint32_t hash = hashString(chars, length);
+    ObjString* interned = tableFindString(&vm.strings, chars, length, hash);
+
+    if (interned) {
+        // Free the string that was passed in and return the interned string
+        FREE_ARRAY(char, chars, length + 1);
+        return interned;
+    }
+
+    return allocateString(chars, length, hash);
+}
+
+/**
+    Either get interned string, or copy chars from source code string into new null terminated string. We do this
+    because not all strings will be expressly written literals in the code (e.g. some may be created by string
+    concatenation), so for every string value in lox, we allocate a new array of chars on the lox heap
  */
 ObjString* copyString(const char* chars, int length) {
+    uint32_t hash = hashString(chars, length);
+    ObjString* interned = tableFindString(&vm.strings, chars, length, hash);
+    if (interned) return interned;
+
     char* heapChars = ALLOCATE(char, length + 1);
     memcpy(heapChars, chars, length);
     heapChars[length] = '\0';
 
-    return allocateString(heapChars, length);
+    return allocateString(heapChars, length, hash);
 }
 
 void printObject(Value value) {
