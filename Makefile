@@ -1,10 +1,19 @@
-CC ?= clang
+CC ?= gcc
+clox-debug: CFLAGS = -g
 
 objects = src/main.o src/chunk/chunk.o src/memory/memory.o src/value/value.o src/debug/debug.o \
           src/vm/vm.o src/compiler/compiler.o src/scanner/scanner.o src/object/object.o src/table/table.o
 
+# $@ refers to the rule target string
+# $ syntax normally uses only the first succeeding character, so $obj expands to $o with the string 'bj'. Use parens for longer vars
 clox: $(objects)
-	cc -o clox $(objects)
+	cc -o $@ $(objects)
+
+clox-debug: $(objects)
+	cc -g -o $@ $(objects)
+
+clean: $(objects)
+	rm $(objects)
 
 src/main.o: src/chunk/chunk.h src/memory/memory.h src/debug/debug.h src/common.h
 src/chunk/chunk.o: src/memory/memory.h src/common.h
