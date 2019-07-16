@@ -13,7 +13,14 @@ clox-debug: $(objects)
 	cc -g -o $@ $(objects)
 
 clean: $(objects)
-	rm $(objects)
+	rm -f $(objects)
+
+.PHONY: rebuild
+rebuild:
+	$(MAKE) clean
+	$(MAKE) clox-debug
+	$(MAKE) clean
+	$(MAKE) clox
 
 src/main.o: src/chunk/chunk.h src/memory/memory.h src/debug/debug.h src/common.h
 src/chunk/chunk.o: src/memory/memory.h src/common.h
