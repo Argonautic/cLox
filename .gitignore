@@ -3,3 +3,4 @@ CMakeLists.txt
 .idea/
 *.o
 clox
+clox-debug
