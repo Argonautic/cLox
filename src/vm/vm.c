@@ -203,8 +203,7 @@ static InterpretResult run() {
                 printf("\n");
                 break;
             case OP_RETURN: {
-                printValue(pop());
-                printf("\n");
+                // Exit interpreter
                 return INTERPRET_OK;  // TODO: Switch to return from function rather than end program execution
             }
         }
